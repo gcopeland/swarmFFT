@@ -1,43 +1,52 @@
 import esphome.codegen as cg
+
 import esphome.config_validation as cv
-from esphome.components import sensor, i2s_audio
 from esphome.const import CONF_ID
 
 MULTI_CONF = False
+AUTO_LOAD = ["mqtt"]
+DEPENDENCIES = ["mqtt"]
 
-AUTO_LOAD = ["sensor", "i2s_audio", "mqtt"]
-
-DEPENDENCIES = ['i2s_audio', "mqtt"]
-
-swarm_component_ns = cg.esphome_ns.namespace('swarm_audio')
+swarm_component_ns = cg.esphome_ns.namespace('swarm_fft_audio')
 SwarmFFTComponent = swarm_component_ns.class_("SwarmFFT",
                                               cg.Component)
 
-# We require Arduino Audio Tools for Mic & FFT
-cg.add_library(
-    name="arduino-audio-tools",
-    repository="https://github.com/pschatzmann/arduino-audio-tools",
-    version=None
-)
+CONF_WS_PIN = "ws_pin"
+CONF_CLOCK_PIN = "clock_pin"
+CONF_DATA_PIN = "data_pin"
+CONF_MQTT_TOPIC_PREFIX = "mqtt_topic_prefix"
 
-# We require ArduinoJSON for serialization of the FFT data
-cg.add_library(
-    name="ArduinoJson",
-    version=None
-)
-
-CONFIG_SCHEMA = cv.All(
-    cv.COMPONENT_SCHEMA.extend(
+CONFIG_SCHEMA = (
+    cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(SwarmFFTComponent),
+            cv.Required(CONF_WS_PIN): cv.int_range(min=1, max=255),
+            cv.Required(CONF_CLOCK_PIN): cv.int_range(min=1, max=255),
+            cv.Required(CONF_DATA_PIN): cv.int_range(min=1, max=255),
+            cv.Required(CONF_MQTT_TOPIC_PREFIX): cv.string("hives"),
         }
     )
+    .extend(cv.COMPONENT_SCHEMA)
 )
-#).extend(cv.COMPONENT_SCHEMA).extend(i2s_audio.i2s_audio_component_schema())
-
-#SWARMFFT_SCHEMA.extend(i2s.i2s_audio_device_schema())
 
 async def to_code(config):
+    # We require Arduino Audio Tools for Mic & FFT
+    cg.add_library(
+        name="arduino-audio-tools",
+        repository="https://github.com/pschatzmann/arduino-audio-tools",
+        version=None
+    )
+
+    # We require ArduinoJSON for serialization of the FFT data
+    cg.add_library(
+        name="ArduinoJson",
+        version=None
+    )
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-#    await i2s.register_i2s_device(var, config)
+
+    cg.add(var.setWsPin(config[CONF_WS_PIN]))
+    cg.add(var.setClockPin(config[CONF_CLOCK_PIN]))
+    cg.add(var.setDataPin(config[CONF_DATA_PIN]))
+    cg.add(var.setMqttTopicPrefix(config[CONF_MQTT_TOPIC_PREFIX]))
