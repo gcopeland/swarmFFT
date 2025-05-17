@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef SWARMFFT_H_
-#define SWARMFFT_H_
-
 /*
  * Smarm Audio FFT detection logic
  *
@@ -93,8 +90,8 @@ namespace swarm_fft_audio {
             }
 
             void setWsPin(uint8_t wsPin) { wsPin_ = wsPin; }
-            void setClockPin(uint8_t clockPin) { clockPin_ = clockPin; }
             void setDataPin(uint8_t dataPin) { dataPin_ = dataPin; }
+            void setClockPin(uint8_t clockPin) { clockPin_ = clockPin; }
             void setMqttTopicPrefix(std::string prefix);
 
         private:
@@ -126,5 +123,3 @@ namespace swarm_fft_audio {
 
 } // namespace swarm_audio
 } // namespace esphome
-
-#endif // SWARMFFT_H_

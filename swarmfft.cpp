@@ -23,10 +23,6 @@
 ** file. This allows for different nodes to have different
 ** pins.
  */
-// extern const uint8_t PIN_MIC_WS;
-// extern const uint8_t PIN_MIC_CLOCK;
-// extern const uint8_t PIN_MIC_DATA;
-// extern const uint8_t PIN_MIC_DATA_IN;
 
 namespace esphome {
 namespace swarm_fft_audio {
@@ -101,7 +97,7 @@ namespace swarm_fft_audio {
                                                   auto dev = root.createNestedObject("dev");
                                                   dev[esphome::mqtt::MQTT_DEVICE_NAME] = name_;
                                                   dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
-                                                  //dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = esphome::ESPHOME_VERSION;
+                                                  dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
                                                   dev[esphome::mqtt::MQTT_DEVICE_MANUFACTURER] = "gtcopeland";
                                               }, 2, true);
         }
@@ -161,7 +157,7 @@ namespace swarm_fft_audio {
             yield();
 
             // Break our FFT data in stripes - MQTT_FFT_STRIPES count
-            // ESP_LOGD(TAG, "STRIPES: %d", MQTT_FFT_STRIPES);
+            ESP_LOGD(TAG, "STRIPES: %d", MQTT_FFT_STRIPES);
             for(auto stripe=0; stripe < MQTT_FFT_STRIPES; stripe++) {
                 auto pubResult = false;
                 while( pubResult == false ) {
