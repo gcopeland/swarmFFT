@@ -23,8 +23,6 @@
 #include <string>
 
 #include "esphome.h"
-#include "esphome/core/component.h"
-#include "esphome/components/mqtt/custom_mqtt_device.h"
 
 #include <ArduinoJson.h>
 

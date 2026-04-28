@@ -79,7 +79,7 @@ namespace swarm_fft_audio {
     void SwarmFFT::doDiscovery() {
         if((!discoveryComplete_) && is_connected()) {
             discoveryComplete_ = publish_json(discovery_topic_,
-                                              [=](JsonObject root) {
+                                              [this](JsonObject root) {
                                                   esphome::mqtt::SendDiscoveryConfig config;
                                                   config.state_topic = true;
                                                   config.command_topic = true;
@@ -104,7 +104,6 @@ namespace swarm_fft_audio {
     }
 
     void SwarmFFT::on_json_message(JsonObject root) {
-        const char *TAG = this -> get_component_source();
         ESP_LOGI(TAG, "MQTT on_json_message");
         if(!root.containsKey("root")) {
             ESP_LOGE(TAG, "root node not provided");
@@ -162,7 +161,7 @@ namespace swarm_fft_audio {
                 auto pubResult = false;
                 while( pubResult == false ) {
                     pubResult = 1 == publish_json(state_topic_,
-                                                  [=](JsonObject root) {
+                                                  [this, stripe](JsonObject root) {
                                                       auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
                                                       root["node"] = name_;
                                                       root["stripe"] = stripe;
