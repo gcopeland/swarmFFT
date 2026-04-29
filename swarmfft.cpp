@@ -168,10 +168,14 @@ namespace swarm_fft_audio {
                                                       auto dataDoc = root.createNestedArray("data");
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
-                                                          auto binDoc = dataDoc.createNestedObject();
-                                                          binDoc["bin"] = bin;
-                                                          binDoc["frequency"] = fftResult_[bin].frequency;
-                                                          binDoc["magnitude"] = fftResult_[bin].magnitude;
+                                                          // Only capture frequencies which fall within our interests
+                                                          if( fftResult_[bin].frequency > MIN_FREQ_THRESHOLD &&
+                                                              fftResult_[bin].frequency < MAX_FREQ_THRESHOLD ) {
+                                                              auto binDoc = dataDoc.createNestedObject();
+                                                              binDoc["bin"] = bin;
+                                                              binDoc["frequency"] = fftResult_[bin].frequency;
+                                                              binDoc["magnitude"] = fftResult_[bin].magnitude;
+                                                          }
                                                           yield();
                                                       }
                                                   }, 1, false);
