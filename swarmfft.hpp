@@ -81,6 +81,8 @@ namespace swarm_fft_audio {
 
             void loop() override;
 
+            void dump_config() override;
+
             bool haveFFTResult() const { return haveFFTResult_; }
 
             void reportFFTResult(AudioFFTBase &fft);

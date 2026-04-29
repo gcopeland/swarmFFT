@@ -71,7 +71,6 @@ namespace swarm_fft_audio {
         fft_.begin(fftCfg_);
 
         ESP_LOGD(TAG, "SwarmFFT::setup() complete");
-        dump_config();
     }
 
 
@@ -136,6 +135,22 @@ namespace swarm_fft_audio {
             incompleteAudio_ = false;
             processFFTResult();
         }
+    }
+
+    void SwarmFFT::dump_config() {
+        ESP_LOGCONFIG(TAG, "SwarmFFT:");
+        ESP_LOGCONFIG(TAG, "   mic_ws_pin: %i", wsPin_);
+        ESP_LOGCONFIG(TAG, "   i2s_din_pin: %i", dataPin_);
+        ESP_LOGCONFIG(TAG, "   i2s_clock_pin: %i", clockPin_);
+        ESP_LOGCONFIG(TAG, "   BPS: %i", BITS_PER_SAMPLE);
+        ESP_LOGCONFIG(TAG, "   Channels: %i", CHANNELS);
+        ESP_LOGCONFIG(TAG, "   FFT_BINS: %i", FFT_BINS);
+        ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQUENCY_HZ);
+        ESP_LOGCONFIG(TAG, "   Min Freq: %i", MIN_FREQ_THRESHOLD);
+        ESP_LOGCONFIG(TAG, "   Max Freq: %i", MAX_FREQ_THRESHOLD);
+        ESP_LOGCONFIG(TAG, "   MQTT State Topic    : %s", state_topic_.c_str());
+        ESP_LOGCONFIG(TAG, "   MQTT Command Topic  : %s", command_topic_.c_str());
+        ESP_LOGCONFIG(TAG, "   MQTT Discovery Topic: %s", discovery_topic_.c_str());
     }
 
 
