@@ -193,11 +193,18 @@ namespace swarm_fft_audio {
                                                               fftResult_[bin].frequency < MAX_FREQ_THRESHOLD ) {
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
-                                                              binDoc["frequency"] = fftResult_[bin].frequency;
-                                                              binDoc["magnitude"] = fftResult_[bin].magnitude;
+                                                              binDoc["frequency"] = int(fftResult_[bin].frequency);
+                                                              binDoc["magnitude"] = int(fftResult_[bin].magnitude) / 10000;
+                                                          } else {
+                                                              auto f = int(fftResult_[bin].frequency);
+                                                              auto m = int(fftResult_[bin].magnitude);
+                                                              ESP_LOGD(TAG, "tossed bin: %d, F: %02f, M: %d",
+                                                                       bin,
+                                                                       f > 0? f:0,
+                                                                       m > 0? m:0);
                                                           }
                                                       }
-                                                  }, 0, false);
+                                                  }, 2, false);
                     yield();
                     if(pubResult == false) {
                         // Allow us to bail if we lose connection
