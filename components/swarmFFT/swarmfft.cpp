@@ -199,10 +199,10 @@ namespace swarm_fft_audio {
                                                               binDoc["frequency"] = freq;
                                                               binDoc["magnitude"] = mag / 1000;
                                                           } else {
-                                                              ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
-                                                                       bin,
-                                                                       f > 0? f:0,
-                                                                       m > 0? m:0/1000);
+                                                              // ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
+                                                              //          bin,
+                                                              //          f > 0? f:0,
+                                                              //          m > 0? m:0/1000);
                                                           }
                                                       }
                                                   }, 2, false);
