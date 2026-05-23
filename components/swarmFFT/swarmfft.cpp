@@ -189,7 +189,7 @@ namespace swarm_fft_audio {
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
                                                           auto freq = int(fftResult_[bin].frequency);
-                                                          auto mag = int(fftResult_[bin].magnitude);
+                                                          auto mag = fftResult_[bin].magnitude;
                                                           // Only capture frequencies which fall within our interests
                                                           if( freq > 0.0 &&
                                                               freq >= MIN_FREQ_THRESHOLD &&
@@ -197,12 +197,12 @@ namespace swarm_fft_audio {
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
                                                               binDoc["frequency"] = freq;
-                                                              binDoc["magnitude"] = mag / 10000;
+                                                              binDoc["magnitude"] = mag / 1000;
                                                           } else {
                                                               ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
                                                                        bin,
                                                                        f > 0? f:0,
-                                                                       m > 0? m:0/10000);
+                                                                       m > 0? m:0/1000);
                                                           }
                                                       }
                                                   }, 2, false);
