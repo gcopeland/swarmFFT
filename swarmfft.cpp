@@ -39,7 +39,7 @@ namespace swarm_fft_audio {
     }
 
     void SwarmFFT::setup() {
-        // Make this instance globally available for status function calls
+        // Make this instance globally available for static callbacks
         setGlobalSwarmFFT(this);
         ESP_LOGD(TAG, "SwarmFFT::setup() has registered this instance for static function calls");
 
@@ -195,9 +195,8 @@ namespace swarm_fft_audio {
                                                               binDoc["frequency"] = fftResult_[bin].frequency;
                                                               binDoc["magnitude"] = fftResult_[bin].magnitude;
                                                           }
-                                                          yield();
                                                       }
-                                                  }, 1, false);
+                                                  }, 0, false);
                     yield();
                     if(pubResult == false) {
                         // Allow us to bail if we lose connection
