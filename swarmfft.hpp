@@ -44,7 +44,7 @@ namespace swarm_fft_audio {
     static const uint16_t BITS_PER_SAMPLE = 32;
     static const uint16_t SAMPLE_LENGTH = 512;
     static const uint16_t MAX_FREQUENCY_HZ = 2000;
-    static const uint16_t SAMPLES_PER_SECOND = MAX_FREQUENCY_HZ * 2; // nyquest rate
+    static const uint16_t SAMPLES_PER_SECOND = MAX_FREQUENCY_HZ;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
     static const uint16_t MIN_FREQ_THRESHOLD = 140;
     static const uint16_t MAX_FREQ_THRESHOLD = 1000;
@@ -95,6 +95,7 @@ namespace swarm_fft_audio {
             void setWsPin(uint8_t wsPin) { wsPin_ = wsPin; }
             void setDataPin(uint8_t dataPin) { dataPin_ = dataPin; }
             void setClockPin(uint8_t clockPin) { clockPin_ = clockPin; }
+            void setDeviceName(std::string name);
             void setMqttTopicPrefix(std::string prefix);
 
         private:

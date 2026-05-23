@@ -188,7 +188,8 @@ namespace swarm_fft_audio {
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
                                                           // Only capture frequencies which fall within our interests
-                                                          if( fftResult_[bin].frequency > MIN_FREQ_THRESHOLD &&
+                                                          if( fftResult_[bin].magnitude > 0.0 &&
+                                                              fftResult_[bin].frequency > MIN_FREQ_THRESHOLD &&
                                                               fftResult_[bin].frequency < MAX_FREQ_THRESHOLD ) {
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
@@ -208,6 +209,12 @@ namespace swarm_fft_audio {
         }
         incompleteAudio_ = false;
         haveFFTResult_ = false;
+    }
+
+
+    void SwarmFFT::setDeviceName(std::string name) {
+        // Set the device name - required for data to correctly register
+        name_ = name;
     }
 
 
