@@ -197,7 +197,7 @@ namespace swarm_fft_audio {
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
                                                               binDoc["frequency"] = freq;
-                                                              binDoc["magnitude"] = mag / 1000;
+                                                              binDoc["magnitude"] = mag;
                                                           } else {
                                                               // ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
                                                               //          bin,
