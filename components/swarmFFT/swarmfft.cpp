@@ -188,21 +188,21 @@ namespace swarm_fft_audio {
                                                       auto dataDoc = root.createNestedArray("data");
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
+                                                          auto freq = int(fftResult_[bin].frequency);
+                                                          auto mag = int(fftResult_[bin].magnitude);
                                                           // Only capture frequencies which fall within our interests
-                                                          if( fftResult_[bin].magnitude > 0.0 &&
-                                                              fftResult_[bin].frequency > MIN_FREQ_THRESHOLD &&
-                                                              fftResult_[bin].frequency < MAX_FREQ_THRESHOLD ) {
+                                                          if( freq > 0.0 &&
+                                                              freq >= MIN_FREQ_THRESHOLD &&
+                                                              freq <= MAX_FREQ_THRESHOLD ) {
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
-                                                              binDoc["frequency"] = int(fftResult_[bin].frequency);
-                                                              binDoc["magnitude"] = int(fftResult_[bin].magnitude) / 10000;
+                                                              binDoc["frequency"] = freq;
+                                                              binDoc["magnitude"] = mag / 10000;
                                                           } else {
-                                                              auto f = int(fftResult_[bin].frequency);
-                                                              auto m = int(fftResult_[bin].magnitude);
-                                                              ESP_LOGD(TAG, "tossed bin: %d, F: %02f, M: %d",
+                                                              ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
                                                                        bin,
                                                                        f > 0? f:0,
-                                                                       m > 0? m:0);
+                                                                       m > 0? m:0/10000);
                                                           }
                                                       }
                                                   }, 2, false);
