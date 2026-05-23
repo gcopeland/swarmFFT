@@ -39,6 +39,10 @@ namespace swarm_fft_audio {
     }
 
     void SwarmFFT::setup() {
+        // Make this instance globally available for status function calls
+        setGlobalSwarmFFT(this);
+        ESP_LOGD(TAG, "SwarmFFT::setup() has registered this instance for static function calls");
+
         // Configuring audio toolkit logging
         ESP_LOGD(TAG, "SwarmFFT::setup() start");
         AudioLogger::instance().begin(Serial, AudioLogger::Warning);
@@ -125,7 +129,7 @@ namespace swarm_fft_audio {
         if(is_connected() && incompleteAudio_ ||
            (now - lastCopy_ >= update_interval_)) {
             incompleteAudio_ = true;
-            ESP_LOGD(TAG, "copier");
+            //ESP_LOGD(TAG, "copier");
             copier_.copy();
             lastCopy_ = now;
         }
