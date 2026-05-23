@@ -107,14 +107,15 @@ namespace swarm_fft_audio {
     }
 
     void SwarmFFT::on_json_message(JsonObject root) {
-        ESP_LOGI(TAG, "MQTT on_json_message");
-        if(!root.containsKey("root")) {
-            ESP_LOGE(TAG, "root node not provided");
-        }
+        // ESP_LOGI(TAG, "MQTT on_json_message");
+        // if(!root.containsKey("root")) {
+        //     ESP_LOGE(TAG, "root node not provided");
+        // }
     }
 
-    void SwarmFFT::on_shutdown() {
-        ESP_LOGI(TAG, "CHIPEN pin not exposed. Sleep mode not available.");
+    void SwarmFFT::on_safe_shutdown() {
+        // TODO: Update the command topic that streaming is not available
+        //ESP_LOGI(TAG, "CHIPEN pin not exposed. Sleep mode not available.");
     }
 
 

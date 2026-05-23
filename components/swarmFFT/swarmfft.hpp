@@ -77,7 +77,7 @@ namespace swarm_fft_audio {
 
             void on_json_message(JsonObject root);
 
-            void on_shutdown() override;
+            void on_safe_shutdown() override;
 
             void loop() override;
 
