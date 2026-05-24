@@ -190,24 +190,10 @@ namespace swarm_fft_audio {
                                                           auto bin = (stripe * stripeLength) + index;
                                                           auto freq = int(fftResult_[bin].frequency);
                                                           auto mag = fftResult_[bin].magnitude;
-#if 0
-                                                          // Only capture frequencies which fall within our interests
-                                                          if( freq > 0.0 &&
-                                                              freq >= MIN_FREQ_THRESHOLD &&
-                                                              freq <= MAX_FREQ_THRESHOLD ) {
-#endif
                                                               auto binDoc = dataDoc.createNestedObject();
                                                               binDoc["bin"] = bin;
                                                               binDoc["frequency"] = freq;
                                                               binDoc["magnitude"] = mag;
-#if 0
-                                                          } else {
-                                                              // ESP_LOGD(TAG, "tossed bin: %d, F: %d, M: %d",
-                                                              //          bin,
-                                                              //          f > 0? f:0,
-                                                              //          m > 0? m:0/1000);
-                                                          }
-#endif
                                                       }
                                                   }, 2, false);
                     yield();
