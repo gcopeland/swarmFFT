@@ -97,7 +97,7 @@ namespace swarm_fft_audio {
                                                   root[esphome::mqtt::MQTT_ICON] = "mdi:microphone-plus";
                                                   root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TEMPLATE] = "{\"bin\":\"{{value}}\"}";
 
-                                                  auto dev = root.createNestedObject("dev");
+                                                  auto dev = root["dev"];
                                                   dev[esphome::mqtt::MQTT_DEVICE_NAME] = name_;
                                                   dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
                                                   dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
@@ -181,19 +181,20 @@ namespace swarm_fft_audio {
                 auto pubResult = false;
                 while( pubResult == false ) {
                     pubResult = 1 == publish_json(state_topic_,
-                                                  [this, stripe](JsonObject root) {
+                                                  [this, stripe](JsonDocument root) {
                                                       auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
                                                       root["node"] = name_;
                                                       root["stripe"] = stripe;
-                                                      auto dataDoc = root.createNestedArray("data");
+                                                      auto dataDoc = root.to<JsonArray>();
+                                                      root["data"].set(dataDoc);
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
-                                                          auto freq = int(fftResult_[bin].frequency);
+                                                          auto freq = std::round(fftResult_[bin].frequency);
                                                           auto mag = fftResult_[bin].magnitude;
-                                                              auto binDoc = dataDoc.createNestedObject();
-                                                              binDoc["bin"] = bin;
-                                                              binDoc["frequency"] = freq;
-                                                              binDoc["magnitude"] = mag;
+                                                          auto binDoc = dataDoc.add<JsonObject>();
+                                                          binDoc["bin"] = bin;
+                                                          binDoc["frequency"] = freq;
+                                                          binDoc["magnitude"] = mag;
                                                       }
                                                   }, 2, false);
                     yield();
