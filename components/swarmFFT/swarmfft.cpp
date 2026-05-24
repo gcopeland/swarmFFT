@@ -196,6 +196,7 @@ namespace swarm_fft_audio {
                                                           binDoc["frequency"] = freq;
                                                           binDoc["magnitude"] = mag;
                                                       }
+                                                      ESP_LOGD(TAG, "JSON: %s", root);
                                                   }, 2, false);
                     yield();
                     if(pubResult == false) {
