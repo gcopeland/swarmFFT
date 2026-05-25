@@ -87,7 +87,7 @@ namespace swarm_fft_audio {
                                                   config.state_topic = true;
                                                   config.command_topic = true;
 
-                                                  root["name"] = name_ + "_swarm_microphone_fft";
+                                                  root["name"] = this->name_ + "_swarm_microphone_fft";
                                                   root["stat_cla"] = "measurement";
                                                   root["suggested_area"] = "hives";
                                                   root[esphome::mqtt::MQTT_STATE_TOPIC] = state_topic_;
@@ -205,7 +205,7 @@ namespace swarm_fft_audio {
                     }
                 };
             }
-            ESP_LOGD(TAG, "[%s] Published %d stripes of data to: %s", this.name_, MQTT_FFT_STRIPES, state_topic_.c_str());
+            ESP_LOGD(TAG, "[%s] Published %d stripes of data to: %s", this->name_, MQTT_FFT_STRIPES, state_topic_.c_str());
         }
         incompleteAudio_ = false;
         haveFFTResult_ = false;
