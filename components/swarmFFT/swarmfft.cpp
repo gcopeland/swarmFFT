@@ -190,7 +190,7 @@ namespace swarm_fft_audio {
                                                           auto bin = (stripe * stripeLength) + index;
                                                           auto freq = std::round(fftResult_[bin].frequency);
                                                           auto mag = std::round(fftResult_[bin].magnitude);
-                                                          mag = (freq <=0)? freq/2 + (bin*bin):mag;
+                                                          mag = (mag <=1)? freq/2 + (bin*bin):mag;
                                                           auto binDoc = dataDoc.createNestedObject();
                                                           binDoc["bin"] = bin;
                                                           binDoc["frequency"] = freq;
