@@ -205,7 +205,9 @@ namespace swarm_fft_audio {
                     }
                 };
             }
-            ESP_LOGD(TAG, "[%s] Published %d stripes of data to: %s", this->name_, MQTT_FFT_STRIPES, state_topic_.c_str());
+            ESP_LOGD(TAG, "[%s] Published %d stripes of data to: %s", this->name_.c_str(),
+                     MQTT_FFT_STRIPES,
+                     state_topic_.c_str());
         }
         incompleteAudio_ = false;
         haveFFTResult_ = false;
