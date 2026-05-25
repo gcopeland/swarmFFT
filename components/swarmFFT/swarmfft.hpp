@@ -42,8 +42,8 @@ namespace swarm_fft_audio {
     // Configs
     static const uint16_t CHANNELS = 2;
     static const uint16_t BITS_PER_SAMPLE = 32;
-    static const uint16_t SAMPLE_LENGTH = 1024;
-    static const uint16_t MAX_FREQUENCY_HZ = 1200;
+    static const uint16_t SAMPLE_LENGTH = 512;
+    static const uint16_t MAX_FREQUENCY_HZ = 2000;
     static const uint16_t SAMPLES_PER_SECOND = MAX_FREQUENCY_HZ * 2;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
     static const uint16_t MIN_FREQ_THRESHOLD = 40;
@@ -108,7 +108,7 @@ namespace swarm_fft_audio {
             AudioFFTResult fftResult_[FFT_BINS] = {0};
             uint32_t update_interval_;
             volatile bool haveFFTResult_;
-            static const uint16_t MQTT_FFT_STRIPES = 32;
+            static const uint16_t MQTT_FFT_STRIPES = 16;
             bool discoveryComplete_ = false;
 
             // Process our FFT audio data
