@@ -186,16 +186,16 @@ namespace swarm_fft_audio {
                                                       auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
                                                       root["node"] = this->name_;
                                                       root["stripe"] = stripe;
-                                                      root["data"] = root.to<JsonArray>();
+                                                      JsonArray data = root["data"] = root.to<JsonArray>();
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
                                                           auto freq = fftResult_[bin].frequency;
                                                           auto mag = fftResult_[bin].magnitude;
-                                                          auto binObject = root.to<JsonObject>();
+                                                          JsonObject binObject = root.to<JsonObject>();
                                                           binObject["bin"] = bin;
                                                           binObject["frequency"] = freq;
                                                           binObject["magnitude"] = mag;
-                                                          root["data"].add(binObject);
+                                                          data.add(binObject);
                                                       }
 
                                                       // root["node"] = this->name_;
