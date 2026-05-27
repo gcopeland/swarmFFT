@@ -45,8 +45,7 @@ namespace swarm_fft_audio {
     static const uint16_t SAMPLE_LENGTH = 512;
     static const uint16_t MIN_FREQ_THRESHOLD = 40;
     static const uint16_t MAX_FREQ_THRESHOLD = 2000;
-    //static const uint16_t SAMPLES_PER_SECOND = MAX_FREQ_THRESHOLD * 2;
-    static const uint16_t 22050;
+    static const uint16_t SAMPLES_PER_SECOND = MAX_FREQ_THRESHOLD * 2;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
 
 
