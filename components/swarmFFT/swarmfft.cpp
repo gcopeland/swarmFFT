@@ -150,7 +150,6 @@ namespace swarm_fft_audio {
         ESP_LOGCONFIG(TAG, "   BPS: %i", BITS_PER_SAMPLE);
         ESP_LOGCONFIG(TAG, "   Channels: %i", CHANNELS);
         ESP_LOGCONFIG(TAG, "   FFT_BINS: %i", FFT_BINS);
-        ESP_LOGCONFIG(TAG, "   Max Freq: %i", MAX_FREQUENCY_HZ);
         ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
         ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQ_THRESHOLD);
         ESP_LOGCONFIG(TAG, "   MQTT State Topic    : %s", state_topic_.c_str());
@@ -188,9 +187,8 @@ namespace swarm_fft_audio {
                                                       auto dataDoc = root.createNestedArray("data");
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
-                                                          auto freq = std::round(fftResult_[bin].frequency + 0.5);
-                                                          auto mag = std::round(fftResult_[bin].magnitude + 0.5);
-                                                          //mag = (mag <=1)? freq/2 + (bin*bin):mag;
+                                                          auto freq = std::round(fftResult_[bin].frequency);
+                                                          auto mag = std::round(fftResult_[bin].magnitude);
                                                           auto binDoc = dataDoc.createNestedObject();
                                                           binDoc["bin"] = bin;
                                                           binDoc["frequency"] = freq;
