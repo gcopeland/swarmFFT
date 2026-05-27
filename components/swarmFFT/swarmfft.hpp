@@ -107,7 +107,7 @@ namespace swarm_fft_audio {
             AudioFFTResult fftResult_[FFT_BINS] = {0};
             uint32_t update_interval_;
             volatile bool haveFFTResult_;
-            static const uint16_t MQTT_FFT_STRIPES = 32;
+            static const uint16_t MQTT_FFT_STRIPES = 8;
             bool discoveryComplete_ = false;
 
             // Process our FFT audio data
