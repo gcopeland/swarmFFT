@@ -182,20 +182,34 @@ namespace swarm_fft_audio {
                 auto pubResult = false;
                 while( pubResult == false ) {
                     pubResult = 1 == publish_json(state_topic_,
-                                                  [this, stripe](JsonObject root) {
+                                                  [this, stripe](JsonDocument root) {
                                                       auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
-                                                      root["node"] = name_;
+                                                      root["node"] = this->name_;
                                                       root["stripe"] = stripe;
-                                                      auto dataDoc = root.createNestedArray("data");
+                                                      root["data"] = root.to<JsonArray>();
                                                       for(auto index=0; index < stripeLength; index++) {
                                                           auto bin = (stripe * stripeLength) + index;
-                                                          auto freq = std::round(fftResult_[bin].frequency);
-                                                          auto mag = std::round(fftResult_[bin].magnitude);
-                                                          auto binDoc = dataDoc.createNestedObject();
-                                                          binDoc["bin"] = bin;
-                                                          binDoc["frequency"] = freq;
-                                                          binDoc["magnitude"] = mag;
+                                                          auto freq = fftResult_[bin].frequency;
+                                                          auto mag = fftResult_[bin].magnitude;
+                                                          auto binObject = root.to<JsonObject>();
+                                                          binObject["bin"] = bin;
+                                                          binObject["frequency"] = freq;
+                                                          binObject["magnitude"] = mag;
+                                                          root["data"].add(binObject);
                                                       }
+
+                                                      // root["node"] = this->name_;
+                                                      // root["stripe"] = stripe;
+                                                      // auto dataDoc = root.createNestedArray("data");
+                                                      // for(auto index=0; index < stripeLength; index++) {
+                                                      //     auto bin = (stripe * stripeLength) + index;
+                                                      //     auto freq = std::round(fftResult_[bin].frequency);
+                                                      //     auto mag = std::round(fftResult_[bin].magnitude);
+                                                      //     auto binDoc = dataDoc.createNestedObject();
+                                                      //     binDoc["bin"] = bin;
+                                                      //     binDoc["frequency"] = freq;
+                                                      //     binDoc["magnitude"] = mag;
+                                                      // }
                                                       // ESP_LOGD(TAG, "JSON: %s", root);
                                                   }, 2, false);
                     yield();
