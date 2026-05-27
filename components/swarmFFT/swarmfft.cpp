@@ -57,8 +57,8 @@ namespace swarm_fft_audio {
         cfg.sample_rate = SAMPLES_PER_SECOND;
         cfg.channels = CHANNELS;
         cfg.is_master = true;
-        //cfg.use_apll = true;
-        cfg.use_apll = false;
+        cfg.use_apll = true;
+        //cfg.use_apll = false;
         cfg.port_no = 0;
         cfg.pin_ws = wsPin_;
         cfg.pin_bck = clockPin_;
