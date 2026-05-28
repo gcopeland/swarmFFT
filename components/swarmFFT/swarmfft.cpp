@@ -150,6 +150,7 @@ namespace swarm_fft_audio {
         ESP_LOGCONFIG(TAG, "   i2s_din_pin: %i", dataPin_);
         ESP_LOGCONFIG(TAG, "   i2s_clock_pin: %i", clockPin_);
         ESP_LOGCONFIG(TAG, "   BPS: %i", BITS_PER_SAMPLE);
+        ESP_LOGCONFIG(TAG, "   SPS: %i", SAMPLES_PER_SECOND);
         ESP_LOGCONFIG(TAG, "   Channels: %i", CHANNELS);
         ESP_LOGCONFIG(TAG, "   FFT_BINS: %i", FFT_BINS);
         ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
