@@ -58,8 +58,8 @@ namespace swarm_fft_audio {
         cfg.channels = CHANNELS;
         cfg.is_master = true;
         //cfg.is_master = false;
-        cfg.use_apll = true;
-        //cfg.use_apll = false;
+        //cfg.use_apll = true;
+        cfg.use_apll = false;
         cfg.port_no = 0;
         cfg.pin_ws = wsPin_;
         cfg.pin_bck = clockPin_;
