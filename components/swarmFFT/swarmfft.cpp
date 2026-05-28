@@ -222,6 +222,9 @@ namespace swarm_fft_audio {
             ESP_LOGD(TAG, "[%s] Published %d stripes of data to: %s", this->name_.c_str(),
                      MQTT_FFT_STRIPES,
                      state_topic_.c_str());
+
+            // FIXME: Dump config to see our configuration - testing only
+            dump_config();
         }
         incompleteAudio_ = false;
         haveFFTResult_ = false;
