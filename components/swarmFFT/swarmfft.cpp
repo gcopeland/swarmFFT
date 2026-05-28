@@ -172,6 +172,9 @@ namespace swarm_fft_audio {
 
 
     void SwarmFFT::processFFTResult() {
+        // FIXME: Dump config to see our configuration - testing only
+        dump_config();
+
         if(is_connected()) {
             // Only try discovery if we're connected
             doDiscovery();
@@ -224,8 +227,6 @@ namespace swarm_fft_audio {
                      MQTT_FFT_STRIPES,
                      state_topic_.c_str());
 
-            // FIXME: Dump config to see our configuration - testing only
-            dump_config();
         }
         incompleteAudio_ = false;
         haveFFTResult_ = false;
