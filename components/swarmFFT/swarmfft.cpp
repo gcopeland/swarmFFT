@@ -153,8 +153,8 @@ namespace swarm_fft_audio {
         ESP_LOGCONFIG(TAG, "   SPS: %i", SAMPLES_PER_SECOND);
         ESP_LOGCONFIG(TAG, "   Channels: %i", CHANNELS);
         ESP_LOGCONFIG(TAG, "   FFT_BINS: %i", FFT_BINS);
-        ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
-        ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQ_THRESHOLD);
+        // ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
+        // ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQ_THRESHOLD);
         ESP_LOGCONFIG(TAG, "   MQTT State Topic    : %s", state_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Command Topic  : %s", command_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Discovery Topic: %s", discovery_topic_.c_str());
