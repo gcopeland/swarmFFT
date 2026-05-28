@@ -56,9 +56,9 @@ namespace swarm_fft_audio {
         cfg.bits_per_sample = BITS_PER_SAMPLE;
         cfg.sample_rate = SAMPLES_PER_SECOND;
         cfg.channels = CHANNELS;
-        //cfg.is_master = true;
-        //cfg.use_apll = true;
-        //cfg.port_no = 0;
+        cfg.is_master = true;
+        cfg.use_apll = false;
+        cfg.port_no = 0;
         cfg.pin_ws = wsPin_;
         cfg.pin_bck = clockPin_;
         cfg.pin_data = dataPin_;
@@ -177,7 +177,6 @@ namespace swarm_fft_audio {
         if(is_connected()) {
             // Only try discovery if we're connected
             doDiscovery();
-            yield();
 
             // Break our FFT data in stripes - MQTT_FFT_STRIPES count
             ESP_LOGD(TAG, "STRIPES: %d", MQTT_FFT_STRIPES);
@@ -215,7 +214,6 @@ namespace swarm_fft_audio {
                                                       }
                                                       // ESP_LOGD(TAG, "JSON: %s", root);
                                                   }, 2, false);
-                    yield();
                     if(pubResult == false) {
                         // Allow us to bail if we lose connection
                         pubResult = !is_connected();
@@ -273,7 +271,6 @@ namespace swarm_fft_audio {
         if(swarmFFT != NULL) {
             swarmFFT -> reportFFTResult(fft);
             ESP_LOGD(TAG, "FFT size: %d", fft.size());
-            yield();
         } else {
             ESP_LOGE(TAG, "SwarmFFT instance is missing and NOT globally available.");
         }
