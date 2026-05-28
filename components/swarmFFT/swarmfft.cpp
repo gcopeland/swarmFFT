@@ -56,11 +56,9 @@ namespace swarm_fft_audio {
         cfg.bits_per_sample = BITS_PER_SAMPLE;
         cfg.sample_rate = SAMPLES_PER_SECOND;
         cfg.channels = CHANNELS;
-        cfg.is_master = true;
-        //cfg.is_master = false;
+        //cfg.is_master = true;
         //cfg.use_apll = true;
-        cfg.use_apll = false;
-        cfg.port_no = 0;
+        //cfg.port_no = 0;
         cfg.pin_ws = wsPin_;
         cfg.pin_bck = clockPin_;
         cfg.pin_data = dataPin_;
@@ -152,10 +150,10 @@ namespace swarm_fft_audio {
         ESP_LOGCONFIG(TAG, "   Channels: %i", CHANNELS);
         ESP_LOGCONFIG(TAG, "   BPS: %i", BITS_PER_SAMPLE);
         ESP_LOGCONFIG(TAG, "   SPS: %i", SAMPLES_PER_SECOND);
-        ESP_LOGCONFIG(TAG, "   SAMPLE LENGTH: %i", SAMPLE_LENGTH);
         ESP_LOGCONFIG(TAG, "   FFT_BINS: %i", FFT_BINS);
         // ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
         // ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQ_THRESHOLD);
+        ESP_LOGCONFIG(TAG, "   SAMPLE SIZE: %i", SAMPLE_LENGTH);
         ESP_LOGCONFIG(TAG, "   MQTT State Topic    : %s", state_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Command Topic  : %s", command_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Discovery Topic: %s", discovery_topic_.c_str());
