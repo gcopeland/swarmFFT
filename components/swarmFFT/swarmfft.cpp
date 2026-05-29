@@ -70,6 +70,7 @@ namespace swarm_fft_audio {
         fftCfg_.sample_rate = cfg.sample_rate;
         fftCfg_.length = SAMPLE_LENGTH;
         fftCfg_.channels = cfg.channels;
+        fftCfg_.channel_used = 0;
         fftCfg_.window_function = new BufferedWindow(new Hamming());
         fftCfg_.callback = fftCallback;
         fft_.begin(fftCfg_);
