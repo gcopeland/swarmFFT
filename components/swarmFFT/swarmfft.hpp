@@ -22,9 +22,9 @@
 
 #include <string>
 
-#include "esphome.h"
+#include <esphome.h>
 
-#include <ArduinoJson.h>
+//#include <ArduinoJson.h>
 
 #include <AudioTools/AudioLibs/AudioRealFFT.h>
 #include <AudioTools.h>
@@ -40,15 +40,17 @@ namespace swarm_fft_audio {
     static const char *TAG = "SwarmFFT";
 
     // Configs
+    static const uint32_t BAND_SIZE = 50; // HZ
     static const uint16_t CHANNELS = 2;
     static const uint16_t BITS_PER_SAMPLE = 32;
     static const uint16_t SAMPLE_LENGTH = 1024;
-    //static const uint16_t MIN_FREQ_THRESHOLD = 40;
-    //static const uint16_t MAX_FREQ_THRESHOLD = 2000;
+    static const uint16_t MIN_FREQ_THRESHOLD = 40;
+    static const uint16_t MAX_FREQ_THRESHOLD = 2000;
     //static const uint16_t SAMPLES_PER_SECOND = MAX_FREQ_THRESHOLD * 2;
     //static const uint16_t SAMPLES_PER_SECOND = 22050;
     static const uint16_t SAMPLES_PER_SECOND = 44100;
-    static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
+    //static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
+    static const uint16_t FFT_BINS = 32;
 
 
 
@@ -108,6 +110,7 @@ namespace swarm_fft_audio {
             bool incompleteAudio_;
             AudioFFTResult fftResult_[FFT_BINS] = {0};
             uint32_t update_interval_;
+            //uint32_t fftScaleBuffer_[(MAX_FREQ_THRESHOLD - MIN_FREQ_THRESHOLD/BAND_SIZE)];
             volatile bool haveFFTResult_;
             static const uint16_t MQTT_FFT_STRIPES = 8;
             bool discoveryComplete_ = false;
