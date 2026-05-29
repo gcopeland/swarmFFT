@@ -84,28 +84,7 @@ namespace swarm_fft_audio {
     void SwarmFFT::doDiscovery() {
         if((!discoveryComplete_) && is_connected()) {
             discoveryComplete_ = publish_json(discovery_topic_,
-                                              // [this](JsonObject root) {
-                                              //     esphome::mqtt::SendDiscoveryConfig config;
-                                              //     config.state_topic = true;
-                                              //     config.command_topic = true;
-
-                                              //     root["name"] = this->name_ + "_swarm_microphone_fft";
-                                              //     root["stat_cla"] = "measurement";
-                                              //     root["suggested_area"] = "hives";
-                                              //     root[esphome::mqtt::MQTT_STATE_TOPIC] = state_topic_;
-                                              //     root[esphome::mqtt::MQTT_COMMAND_TOPIC] = command_topic_;
-                                              //     root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TOPIC] = state_topic_;
-                                              //     root[esphome::mqtt::MQTT_UNIQUE_ID] = this->name_ + "_microphone_" + get_mac_address();
-                                              //     root[esphome::mqtt::MQTT_ICON] = "mdi:microphone-plus";
-                                              //     root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TEMPLATE] = "{\"bin\":\"{{value}}\"}";
-
-                                              //     auto dev = root.createNestedObject("dev");
-                                              //     dev[esphome::mqtt::MQTT_DEVICE_NAME] = name_;
-                                              //     dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
-                                              //     dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
-                                              //     dev[esphome::mqtt::MQTT_DEVICE_MANUFACTURER] = "gtcopeland";
-                                              // }, 2, true);
-                                              [this](JsonDocument root) {
+                                              [this](JsonObject root) {
                                                   esphome::mqtt::SendDiscoveryConfig config;
                                                   config.state_topic = true;
                                                   config.command_topic = true;
@@ -120,13 +99,34 @@ namespace swarm_fft_audio {
                                                   root[esphome::mqtt::MQTT_ICON] = "mdi:microphone-plus";
                                                   root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TEMPLATE] = "{\"bin\":\"{{value}}\"}";
 
-                                                  JsonObject dev = root["dev"] = root.to<JsonObject>();
-                                                  //auto dev = root.createNestedObject("dev");
+                                                  auto dev = root.createNestedObject("dev");
                                                   dev[esphome::mqtt::MQTT_DEVICE_NAME] = name_;
                                                   dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
                                                   dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
                                                   dev[esphome::mqtt::MQTT_DEVICE_MANUFACTURER] = "gtcopeland";
                                               }, 2, true);
+                                              // [this](JsonDocument root) {
+                                              //     esphome::mqtt::SendDiscoveryConfig config;
+                                              //     config.state_topic = true;
+                                              //     config.command_topic = true;
+
+                                              //     root["name"] = this->name_ + "_swarm_microphone_fft";
+                                              //     root["stat_cla"] = "measurement";
+                                              //     root["suggested_area"] = "hives";
+                                              //     root[esphome::mqtt::MQTT_STATE_TOPIC] = state_topic_;
+                                              //     root[esphome::mqtt::MQTT_COMMAND_TOPIC] = command_topic_;
+                                              //     root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TOPIC] = state_topic_;
+                                              //     root[esphome::mqtt::MQTT_UNIQUE_ID] = this->name_ + "_microphone_" + get_mac_address();
+                                              //     root[esphome::mqtt::MQTT_ICON] = "mdi:microphone-plus";
+                                              //     root[esphome::mqtt::MQTT_JSON_ATTRIBUTES_TEMPLATE] = "{\"bin\":\"{{value}}\"}";
+
+                                              //     JsonObject dev = root["dev"] = root.to<JsonObject>();
+                                              //     //auto dev = root.createNestedObject("dev");
+                                              //     dev[esphome::mqtt::MQTT_DEVICE_NAME] = name_;
+                                              //     dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
+                                              //     dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
+                                              //     dev[esphome::mqtt::MQTT_DEVICE_MANUFACTURER] = "gtcopeland";
+                                              // }, 2, true);
         }
     }
 
@@ -212,56 +212,54 @@ namespace swarm_fft_audio {
             for(auto stripe=0; stripe < MQTT_FFT_STRIPES; stripe++) {
                 auto pubResult = false;
                 while( pubResult == false ) {
-                  pubResult =
-                      1 == publish_json( state_topic_, [this, stripe, stripeLength](JsonDocument) {
-                          JsonDocument root;
-                          root["node"] = this->name_;
-                          root["stripe"] = stripe;
-                          JsonArray binDoc = root["data"] = root.to<JsonArray>();
-                          for (auto index = 0; index < stripeLength; ++index) {
-                              auto bin = (stripe * stripeLength) + index;
-                              auto freq = fftResult_[bin].frequency;
-                              auto mag = fftResult_[bin].magnitude;
-                              JsonObject binObject = binDoc.add<JsonObject>();
-                              binObject["bin"] = bin;
-                              binObject["frequency"] = freq;
-                              binObject["magnitude"] = mag;
-                          }
-                      }, 2, false);
+                  // pubResult =
+                  //     1 == publish_json( state_topic_, [this, stripe, stripeLength](JsonDocument) {
+                  //         JsonDocument root;
+                  //         root["node"] = this->name_;
+                  //         root["stripe"] = stripe;
+                  //         JsonArray binDoc = root["data"] = root.to<JsonArray>();
+                  //         for (auto index = 0; index < stripeLength; ++index) {
+                  //             auto bin = (stripe * stripeLength) + index;
+                  //             auto freq = fftResult_[bin].frequency;
+                  //             auto mag = fftResult_[bin].magnitude;
+                  //             JsonObject binObject = binDoc.add<JsonObject>();
+                  //             binObject["bin"] = bin;
+                  //             binObject["frequency"] = freq;
+                  //             binObject["magnitude"] = mag;
+                  //         }
+                  //     }, 2, false);
 
-                  // pubResult = 1 == publish_json(state_topic_,
-                  //                               [this, stripe](JsonObject
-                  //                               root) {
-                  //                                   auto stripeLength =
-                  //                                   FFT_BINS/MQTT_FFT_STRIPES;
-                  // root["node"] = this->name_;
-                 // root["stripe"] = stripe;
-                  // JsonArray data = root["data"] = root.to<JsonArray>();
-                  // for(auto index=0; index < stripeLength; index++) {
-                  //     auto bin = (stripe * stripeLength) + index;
-                  //     auto freq = fftResult_[bin].frequency;
-                  //     auto mag = fftResult_[bin].magnitude;
-                  //     JsonObject binObject = root.to<JsonObject>();
-                  //     binObject["bin"] = bin;
-                  //     binObject["frequency"] = freq;
-                  //     binObject["magnitude"] = mag;
-                  //     data.add(binObject);
-                  // }
+                  pubResult = 1 == publish_json(state_topic_,
+                                                [this, stripe](JsonObject root) {
+                                                    auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
+                                                    // root["node"] = this->name_;
+                                                    // root["stripe"] = stripe;
+                                                    // JsonArray data = root["data"] = root.to<JsonArray>();
+                                                    // for(auto index=0; index < stripeLength; index++) {
+                                                    //     auto bin = (stripe * stripeLength) + index;
+                                                    //     auto freq = fftResult_[bin].frequency;
+                                                    //     auto mag = fftResult_[bin].magnitude;
+                                                    //     JsonObject binObject = root.to<JsonObject>();
+                                                    //     binObject["bin"] = bin;
+                                                    //     binObject["frequency"] = freq;
+                                                    //     binObject["magnitude"] = mag;
+                                                    //     data.add(binObject);
+                                                    // }
 
-                  // root["node"] = this->name_;
-                  // root["stripe"] = stripe;
-                  // auto dataDoc = root.createNestedArray("data");
-                  // for(auto index=0; index < stripeLength; index++) {
-                  //     auto bin = (stripe * stripeLength) + index;
-                  //     auto freq = std::round(fftResult_[bin].frequency);
-                  //     auto mag = std::round(fftResult_[bin].magnitude);
-                  //     auto binDoc = dataDoc.createNestedObject();
-                  //     binDoc["bin"] = bin;
-                  //     binDoc["frequency"] = freq;
-                  //     binDoc["magnitude"] = mag;
-                  // }
-                  // ESP_LOGD(TAG, "JSON: %s", root);
-                  // }, 2, false);
+                                                    root["node"] = this->name_;
+                                                    root["stripe"] = stripe;
+                                                    auto dataDoc = root.createNestedArray("data");
+                                                    for(auto index=0; index < stripeLength; index++) {
+                                                        auto bin = (stripe * stripeLength) + index;
+                                                        auto freq = std::round(fftResult_[bin].frequency);
+                                                        auto mag = std::round(fftResult_[bin].magnitude);
+                                                        auto binDoc = dataDoc.createNestedObject();
+                                                        binDoc["bin"] = bin;
+                                                        binDoc["frequency"] = freq;
+                                                        binDoc["magnitude"] = mag;
+                                                    }
+                                                    ESP_LOGD(TAG, "JSON: %s", root);
+                                                    }, 2, false);
                   if (pubResult == false) {
                     // Allow us to bail if we lose connection
                     pubResult = !is_connected();
