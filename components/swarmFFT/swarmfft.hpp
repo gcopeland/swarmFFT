@@ -18,17 +18,20 @@
  *
  */
 
+#include <cstdint>
+#include <string>
 #include <stdint.h>
 
-#include <string>
-
 #include <esphome.h>
+#include <esphome/core/hal.h>  // for GPIOPin
 
-//#include <ArduinoJson.h>
-
-#include <AudioTools/AudioLibs/AudioRealFFT.h>
+// Audio processing & FFT
 #include <AudioTools.h>
+#include <AudioTools/AudioLibs/AudioRealFFT.h>
 
+// Headers for audio streaming -  UDP + Opus + Ogg container
+// #include <AudioTools/Communication/UDPStream.h>
+// #include <AudioTools/AudioCodecs/CodecOpusOgg.h>
 /*
 ** These must be declared in the including configuration
 ** file. This allows for different nodes to have different
@@ -39,19 +42,34 @@ namespace swarm_fft_audio {
     // Our logging component name
     static const char *TAG = "SwarmFFT";
 
-    // Configs
-    static const uint32_t BAND_SIZE = 50; // HZ
-    static const uint16_t CHANNELS = 2;
-    static const uint16_t BITS_PER_SAMPLE = 32;
-    static const uint16_t SAMPLE_LENGTH = 1024;
-    static const uint16_t MIN_FREQ_THRESHOLD = 40;
-    static const uint16_t MAX_FREQ_THRESHOLD = 2000;
-    //static const uint16_t SAMPLES_PER_SECOND = MAX_FREQ_THRESHOLD * 2;
-    //static const uint16_t SAMPLES_PER_SECOND = 22050;
-    static const uint16_t SAMPLES_PER_SECOND = 44100;
-    //static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
-    static const uint16_t FFT_BINS = 32;
+    // Config constants
+    // AUDIO INPUT
+    static const uint16_t INPUT_CHANNELS = 2;
+    static const uint16_t INPUT_BITS_PER_SAMPLE = 32;
+    static const uint16_t INPUT_SAMPLES_PER_SECOND = 22050;
 
+    // AUDIO OUTPUT
+    static const uint16_t OUTPUT_CHANNELS = 1;
+    static const uint16_t OUTPUT_BITS_PER_SAMPLE = 16;
+    // static const uint16_t OUTPUT_SAMPLES_PER_SECOND = 11025;
+    static const uint16_t OUTPUT_SAMPLES_PER_SECOND = INPUT_SAMPLES_PER_SECOND;
+
+    // OPUS SPECIFIC
+    // static const uint32_t OPUS_SAMPLE_RATE = 12000;
+    // static const uint32_t OPUS_COMPEXITY = 3;
+
+    // FFT SPECIFICS
+    static const uint16_t SAMPLE_LENGTH = 512;
+    static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
+    static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
+    static const int16_t  DB_FLOOR_THRESHOLD = -35;
+    static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
+    static const uint16_t MQTT_FFT_STRIPES = 32;
+
+    // FFT FILTER
+    static const float FFT_FLOOR_THRESHOLD = -25.0;
+    static const float FFT_FILTER_MIN_FREQ = 100.0;
+    static const float FFT_FILTER_MAX_FREQ = 1200.0;
 
 
     class SwarmFFT : public esphome::Component,
@@ -76,9 +94,9 @@ namespace swarm_fft_audio {
             void setup() override;
 
             // Announce ourselves to home assistant
-            void doDiscovery();
+            bool doDiscovery();
 
-            void on_json_message(JsonObject root);
+            void on_json_message(const std::string &topic, JsonObject root);
 
             void on_safe_shutdown() override;
 
@@ -90,9 +108,12 @@ namespace swarm_fft_audio {
 
             void reportFFTResult(AudioFFTBase &fft);
 
-            // Tell it we are only data and can start later
+            // We only want to start after we have a connection else
+            // it doesn't matter as we can't send it anyways.
             float get_setup_priority() const override {
-                return esphome::setup_priority::AFTER_CONNECTION;
+                // FIXME: We only want to start after we have a connection
+                return esphome::setup_priority::DATA;
+                //return esphome::setup_priority::AFTER_CONNECTION;
             }
 
             void setWsPin(uint8_t wsPin) { wsPin_ = wsPin; }
@@ -103,20 +124,33 @@ namespace swarm_fft_audio {
 
         private:
             I2SStream i2s_;
+            I2SConfig cfg_;
+            StreamCopy audioCopier_;
+            // WiFiUDP udp_;
+            // UDPStream udpStream_;
             AudioRealFFT fft_;
-            AudioFFTConfig fftCfg_;
-            StreamCopy copier_;
+            MultiOutput multi_;           // multiple destinations
+            // Throttle throttle_;           // throttle our stream data
+            VolumeStream volume_;         // Dynamically adjust volume
+            // MeasuringStream measure_;     // measure out output to our datagrams
+            FormatConverterStream converter_; // convert is2 -> 16bit mono
+            // OpusAudioEncoder audioEncoder_;
+            // EncodedAudioStream encodedAudioStream_;
+            //FilteredStream<uint16_t, BandPassFilter<float>> bandPass_; //Filter our input
+
             uint32_t lastCopy_;
-            bool incompleteAudio_;
-            AudioFFTResult fftResult_[FFT_BINS] = {0};
-            uint32_t update_interval_;
-            //uint32_t fftScaleBuffer_[(MAX_FREQ_THRESHOLD - MIN_FREQ_THRESHOLD/BAND_SIZE)];
-            volatile bool haveFFTResult_;
-            static const uint16_t MQTT_FFT_STRIPES = 8;
+            bool haveFFTResult_ = false;
+            bool incompleteAudio_ = false;
+            bool streamingEnabled_ = false;
             bool discoveryComplete_ = false;
+            float audioLevel_ = 0.8f; // 0.0 - 1.0
+            uint32_t update_interval_; // FIXME: We don't need this anymore
+            AudioFFTResult fftResult_[FFT_BINS] = {0};
 
             // Process our FFT audio data
+            size_t filterToIndex(size_t index);
             void processFFTResult();
+            bool isJSONStreamConfig(JsonObject &obj);
     };
 
     /*
