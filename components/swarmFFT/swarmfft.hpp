@@ -64,11 +64,11 @@ namespace swarm_fft_audio {
     static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
     static const int16_t  DB_FLOOR_THRESHOLD = -35;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
-    static const uint16_t MQTT_FFT_STRIPES = 32;
+    static const uint16_t MQTT_FFT_STRIPES = 16;
 
     // FFT FILTER
-    static const float FFT_FLOOR_THRESHOLD = -25.0;
-    static const float FFT_FILTER_MIN_FREQ = 100.0;
+    static const float FFT_FLOOR_THRESHOLD = -45.0;
+    static const float FFT_FILTER_MIN_FREQ = 80.0;
     static const float FFT_FILTER_MAX_FREQ = 1200.0;
 
 
@@ -112,8 +112,8 @@ namespace swarm_fft_audio {
             // it doesn't matter as we can't send it anyways.
             float get_setup_priority() const override {
                 // FIXME: We only want to start after we have a connection
-                return esphome::setup_priority::DATA;
-                //return esphome::setup_priority::AFTER_CONNECTION;
+                //return esphome::setup_priority::DATA;
+                return esphome::setup_priority::AFTER_CONNECTION;
             }
 
             void setWsPin(uint8_t wsPin) { wsPin_ = wsPin; }
@@ -148,7 +148,7 @@ namespace swarm_fft_audio {
             AudioFFTResult fftResult_[FFT_BINS] = {0};
 
             // Process our FFT audio data
-            size_t filterToIndex(size_t index);
+            bool filterByIndex(size_t index);
             void processFFTResult();
             bool isJSONStreamConfig(JsonObject &obj);
     };
