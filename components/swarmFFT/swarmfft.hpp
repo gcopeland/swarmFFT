@@ -59,15 +59,15 @@ namespace swarm_fft_audio {
     // static const uint32_t OPUS_COMPEXITY = 3;
 
     // FFT SPECIFICS
-    static const uint16_t SAMPLE_LENGTH = 512;
+    static const uint16_t SAMPLE_LENGTH = 256;
     static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
     static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
     static const int16_t  DB_FLOOR_THRESHOLD = -35;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
-    static const uint16_t MQTT_FFT_STRIPES = 16;
+    static const uint16_t MQTT_FFT_STRIPES = 1;
 
     // FFT FILTER
-    static const float FFT_FLOOR_THRESHOLD = -45.0;
+    static const float FFT_FLOOR_THRESHOLD = -25.0;
     static const float FFT_FILTER_MIN_FREQ = 80.0;
     static const float FFT_FILTER_MAX_FREQ = 1200.0;
 
@@ -111,9 +111,7 @@ namespace swarm_fft_audio {
             // We only want to start after we have a connection else
             // it doesn't matter as we can't send it anyways.
             float get_setup_priority() const override {
-                // FIXME: We only want to start after we have a connection
-                //return esphome::setup_priority::DATA;
-                return esphome::setup_priority::AFTER_CONNECTION;
+                return esphome::setup_priority::DATA;
             }
 
             void setWsPin(uint8_t wsPin) { wsPin_ = wsPin; }
@@ -121,7 +119,13 @@ namespace swarm_fft_audio {
             void setClockPin(uint8_t clockPin) { clockPin_ = clockPin; }
             void setDeviceName(std::string name);
             void setMqttTopicPrefix(std::string prefix);
+            void setI2SPort(uint8_t port) {};
+            void setVolume(float volume) {};
+            void setDBFloor(float floordB) {};
 
+            // Zero means continuous
+            void setReadingsPerMinute(uint32_t interval) { update_interval_ = (interval > 0)?60*1000/interval : 0; };
+            
         private:
             I2SStream i2s_;
             I2SConfig cfg_;
@@ -144,7 +148,8 @@ namespace swarm_fft_audio {
             bool streamingEnabled_ = false;
             bool discoveryComplete_ = false;
             float audioLevel_ = 0.8f; // 0.0 - 1.0
-            uint32_t update_interval_; // FIXME: We don't need this anymore
+            uint32_t last_update_;
+            uint32_t update_interval_;
             AudioFFTResult fftResult_[FFT_BINS] = {0};
 
             // Process our FFT audio data

@@ -22,6 +22,8 @@ CONF_DEFAULT_VOLUME = "default_volume"
 CONF_DB_FLOOR = "db_floor"
 CONF_DEVICE_NAME = "device_name"
 CONF_MQTT_TOPIC_PREFIX = "mqtt_topic_prefix"
+CONF_MQTT_READINGS_PER_MINUTE = "readings_per_minute"
+
 
 CONFIG_SCHEMA = (
     cv.Schema(
@@ -35,6 +37,7 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_DB_FLOOR): cv.float_range(-60,0),
             cv.Required(CONF_DEVICE_NAME): cv.string,
             cv.Required(CONF_MQTT_TOPIC_PREFIX): cv.string,
+            cv.Required(CONF_MQTT_READINGS_PER_MINUTE): cv.int_range(0,120),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -71,6 +74,10 @@ async def to_code(config):
     cg.add(var.setClockPin(config[CONF_CLOCK_PIN]))
     cg.add(var.setDeviceName(config[CONF_DEVICE_NAME]))
     cg.add(var.setMqttTopicPrefix(config[CONF_MQTT_TOPIC_PREFIX]))
+    cg.add(var.setI2SPort(config[CONF_I2S_PORT]))
+    cg.add(var.setVolume(config[CONF_DEFAULT_VOLUME]))
+    cg.add(var.setDBFloor(config[CONF_DB_FLOOR]))
+    cg.add(var.setReadingsPerMinute(config[CONF_MQTT_READINGS_PER_MINUTE]))
 
     # include I2S configuration for ISR and the actual i2s driver
     add_idf_sdkconfig_option("CONFIG_I2S_ISR_IRAM_SAFE", True)

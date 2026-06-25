@@ -245,11 +245,39 @@ namespace swarm_fft_audio {
 
 
     void SwarmFFT::reportFFTResult(AudioFFTBase &fft) {
-        if(haveFFTResult_) {
-            ESP_LOGE(TAG, "FFT delivered with pending FFT.");
+        bool doUpdate = false;
+        bool connected = is_connected();
+        
+        if(last_update_ == 0) {
+            ESP_LOGD(TAG, "initial sample time set");
+            last_update_ = millis();
+        }
+
+        // Time to sample again?
+        if(connected && update_interval_ > 0 &&
+           millis() - last_update_  > update_interval_) {
+            last_update_ = millis();
+            doUpdate = true;
+            ESP_LOGD(TAG, "UPDATE INTERVAL EXPIRED");
+        }
+
+        // If in continuous mode, force check
+        if(connected && update_interval_ == 0) {
+            doUpdate = true;
+        }
+
+        // If update needed, do it
+        if(doUpdate) {
+            if(haveFFTResult_) {
+                ESP_LOGE(TAG, "FFT delivered with pending FFT.");
+            } else {
+                fft.resultArray(fftResult_);
+                haveFFTResult_ = true;
+            }
         } else {
-            fft.resultArray(fftResult_);
-            haveFFTResult_ = true;
+            // Clear the flag and reset the FFT buffers
+            fft_.reset();
+            haveFFTResult_ = false;
         }
     }
 
@@ -281,6 +309,9 @@ namespace swarm_fft_audio {
         uint16_t binSequence = 0;
         auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
 
+        // FIXME: Add interval reporting.
+        // If outside the interval simply reset the processed flags
+
         // We have connection so try to publish
         // If publish fails we simply bail with an error
         if(is_connected()) {
@@ -288,6 +319,17 @@ namespace swarm_fft_audio {
             // bail with an error. Likely loss of connection.
             // We yield after each publish to allow WDT and publish
             // to occur.
+#if 0
+            JsonDocument testDoc;
+            testDoc["something"] = "asdf";
+            testDoc["something else"] = "asdfdasf";
+            auto testData = testDoc["data"].to<JsonArray>();
+            JsonObject obj = testData.add<JsonObject>();
+            obj["asdf"] = "fdas";
+            publish_json(state_topic_, [testDoc](JsonObject msg) {
+                msg.set(testDoc.as<JsonObjectConst>());
+            }, 2, false);
+#endif
             for(auto stripe=0; stripe < MQTT_FFT_STRIPES; stripe++) {
                 // FIXME: grab the bin and determine if it passes filter.
                 // Do not generate a message until we have at least one bin
@@ -331,7 +373,7 @@ namespace swarm_fft_audio {
             }
         } else {
             // not connected - noop
-            ESP_LOGD(TAG, "MQTT not connected.");
+            // ESP_LOGD(TAG, "MQTT not connected.");
         }
 
         // Reset our state for the next FFT collection
