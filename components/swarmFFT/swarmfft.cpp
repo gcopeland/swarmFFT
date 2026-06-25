@@ -29,14 +29,7 @@
 namespace esphome {
 namespace swarm_fft_audio {
     SwarmFFT::SwarmFFT() :
-        audioCopier_(converter_, i2s_),
-        wsPin_(0),
-        clockPin_(0),
-        dataPin_(0),
-        lastCopy_(0),
-        incompleteAudio_(true),
-        update_interval_(0xFFFFFFFF) {
-        ESP_LOGI(TAG, "ESPHhome prevents RAII");
+        audioCopier_(converter_, i2s_) {
     }
 
     void SwarmFFT::setup() {
@@ -67,7 +60,7 @@ namespace swarm_fft_audio {
         i2sCfg.pin_bck  = clockPin_;
         i2sCfg.pin_data = dataPin_;
         i2sCfg.i2s_format = I2S_STD_FORMAT;   // standard Philips I2S
-        i2sCfg.port_no = 0;  // FIXME: Make this a configuration
+        i2sCfg.port_no = i2sPort_;
         i2sCfg.is_master = true;              // ESP32 drives the clock
         i2sCfg.use_apll = true;
         i2s_.begin(i2sCfg);
@@ -162,35 +155,21 @@ namespace swarm_fft_audio {
         serializeJson(root, jsonBuffer, buffSize);
         ESP_LOGD(TAG, "MQTT on_json_message: %s", jsonBuffer);
 
-        // // Streaming Config
-        // //
-        // if(isJSONStreamConfig(root)) {
-        //     auto sc = root["streamConfig"];
-        //     auto host = sc["host"].as<String>();
-        //     auto port = sc["port"].as<uint16_t>();
-        //     auto volume = sc["volume"].as<uint8_t>();
-        //     auto enabled = sc["enabled"].as<bool>();
-
-        //     audioLevel_ = map(volume, 0, 255, 0.0, 8.0);
-        //     streamingEnabled_ = enabled;
-        // } else {
-        //     ESP_LOGD(TAG, "streamConfig key not found");
-        // }
+        // Streaming Config
+        // FIXME: WARNING - We are not doing input validation - this is dangerous
+        auto sc = root["AudioConfig"];
+        auto host = sc["host"].as<String>();
+        auto port = sc["port"].as<uint16_t>();
+        setVolume(sc["volume"].as<uint8_t>());
+        setDBFloor(sc["db_floor"].as<float>());
+        setReadingsPerMinute(sc["readings_per_minute"].as<uint16_t>());
+        streamingEnabled_ = sc["enabled"].as<bool>();
     }
 
     // Verify the json object is a streamConfig with
     // all keys and value types
     bool SwarmFFT::isJSONStreamConfig(JsonObject &obj) {
-        bool retValue = false;
-        const char objName[] = "streamConfig";
-
-        if(obj[objName].is<JsonObject>()) {
-            auto sc = obj[objName];
-            retValue = sc["host"].is<String>() && sc["port"].is<int>() &&
-                sc["volme"].is<int>() && sc["enabled"].is<bool>();
-        }
-
-        return retValue;
+        return true;
     }
 
     void SwarmFFT::on_safe_shutdown() {
@@ -210,14 +189,13 @@ namespace swarm_fft_audio {
         // Make sure have had HA discovery information
         doDiscovery();
 
-        // Process FFT data if it's available
-        if(haveFFTResult()) {
-            incompleteAudio_ = false;
-            processFFTResult();
-            yield();
-        }
+        // Move around our audio data for processing
         audioCopier_.copy();
 
+        // Process FFT data if it's available
+        if(haveFFTResult()) {
+            processFFTResult();
+        }
     }
 
     
@@ -237,7 +215,7 @@ namespace swarm_fft_audio {
         ESP_LOGCONFIG(TAG, "   MQTT FFT STRIPES: %i", MQTT_FFT_STRIPES);
         ESP_LOGCONFIG(TAG, "   Min Freq Threshold: %i", MIN_FREQ_THRESHOLD);
         ESP_LOGCONFIG(TAG, "   Max Freq Threshold: %i", MAX_FREQ_THRESHOLD);
-        ESP_LOGCONFIG(TAG, "   DB Floor Threshold: %d", DB_FLOOR_THRESHOLD);
+        ESP_LOGCONFIG(TAG, "   DB Floor Threshold: %f", dbFilterThreshold_);
         ESP_LOGCONFIG(TAG, "   MQTT State Topic    : %s", state_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Command Topic  : %s", command_topic_.c_str());
         ESP_LOGCONFIG(TAG, "   MQTT Discovery Topic: %s", discovery_topic_.c_str());
@@ -249,7 +227,6 @@ namespace swarm_fft_audio {
         bool connected = is_connected();
         
         if(last_update_ == 0) {
-            ESP_LOGD(TAG, "initial sample time set");
             last_update_ = millis();
         }
 
@@ -258,7 +235,6 @@ namespace swarm_fft_audio {
            millis() - last_update_  > update_interval_) {
             last_update_ = millis();
             doUpdate = true;
-            ESP_LOGD(TAG, "UPDATE INTERVAL EXPIRED");
         }
 
         // If in continuous mode, force check
@@ -270,6 +246,7 @@ namespace swarm_fft_audio {
         if(doUpdate) {
             if(haveFFTResult_) {
                 ESP_LOGE(TAG, "FFT delivered with pending FFT.");
+                fft_.reset();
             } else {
                 fft.resultArray(fftResult_);
                 haveFFTResult_ = true;
@@ -297,7 +274,7 @@ namespace swarm_fft_audio {
             
         if(freq >= FFT_FILTER_MIN_FREQ &&
            freq <= FFT_FILTER_MAX_FREQ &&
-           db >= FFT_FLOOR_THRESHOLD) {
+           db >= dbFilterThreshold_) {
             retValue = true;
         }
 
@@ -377,7 +354,6 @@ namespace swarm_fft_audio {
         }
 
         // Reset our state for the next FFT collection
-        incompleteAudio_ = false;
         haveFFTResult_ = false;
     }
 

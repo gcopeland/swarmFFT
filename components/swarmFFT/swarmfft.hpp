@@ -62,7 +62,6 @@ namespace swarm_fft_audio {
     static const uint16_t SAMPLE_LENGTH = 256;
     static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
     static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
-    static const int16_t  DB_FLOOR_THRESHOLD = -35;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
     static const uint16_t MQTT_FFT_STRIPES = 1;
 
@@ -119,9 +118,9 @@ namespace swarm_fft_audio {
             void setClockPin(uint8_t clockPin) { clockPin_ = clockPin; }
             void setDeviceName(std::string name);
             void setMqttTopicPrefix(std::string prefix);
-            void setI2SPort(uint8_t port) {};
-            void setVolume(float volume) {};
-            void setDBFloor(float floordB) {};
+            void setI2SPort(uint16_t port) { i2sPort_ = port; }
+            void setVolume(float volume) { audioLevel_ = volume; }
+            void setDBFloor(float floorDB) { dbFilterThreshold_ = floorDB; }
 
             // Zero means continuous
             void setReadingsPerMinute(uint32_t interval) { update_interval_ = (interval > 0)?60*1000/interval : 0; };
@@ -142,14 +141,15 @@ namespace swarm_fft_audio {
             // EncodedAudioStream encodedAudioStream_;
             //FilteredStream<uint16_t, BandPassFilter<float>> bandPass_; //Filter our input
 
-            uint32_t lastCopy_;
             bool haveFFTResult_ = false;
-            bool incompleteAudio_ = false;
             bool streamingEnabled_ = false;
             bool discoveryComplete_ = false;
-            float audioLevel_ = 0.8f; // 0.0 - 1.0
-            uint32_t last_update_;
-            uint32_t update_interval_;
+            float audioLevel_ = 1.0f;
+            float dbFilterThreshold_ = -120.0f;
+            uint16_t i2sPort_ = 0;
+            uint32_t lastCopy_ = 0;
+            uint32_t last_update_ = 0;
+            uint32_t update_interval_ = 1;
             AudioFFTResult fftResult_[FFT_BINS] = {0};
 
             // Process our FFT audio data
