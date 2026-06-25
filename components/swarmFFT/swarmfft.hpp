@@ -63,7 +63,7 @@ namespace swarm_fft_audio {
     static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
     static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
-    static const uint16_t MQTT_FFT_STRIPES = 1;
+    static const uint16_t MQTT_FFT_STRIPES = 16;
 
     // FFT FILTER
     static const float FFT_FLOOR_THRESHOLD = -25.0;
