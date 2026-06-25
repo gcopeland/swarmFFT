@@ -123,7 +123,7 @@ namespace swarm_fft_audio {
             void setDBFloor(float floorDB) { dbFilterThreshold_ = floorDB; }
 
             // Zero means continuous
-            void setReadingsPerMinute(uint32_t interval) { update_interval_ = (interval > 0)?60*1000/interval : 0; };
+            void setSamplesPerMinute(uint32_t interval) { update_interval_ = (interval > 0)?60*1000/interval : 0; };
             
         private:
             I2SStream i2s_;

@@ -162,7 +162,7 @@ namespace swarm_fft_audio {
         auto port = sc["port"].as<uint16_t>();
         setVolume(sc["volume"].as<uint8_t>());
         setDBFloor(sc["db_floor"].as<float>());
-        setReadingsPerMinute(sc["readings_per_minute"].as<uint16_t>());
+        setSamplesPerMinute(sc["fftp_samples_per_minute"].as<uint16_t>());
         streamingEnabled_ = sc["enabled"].as<bool>();
     }
 
