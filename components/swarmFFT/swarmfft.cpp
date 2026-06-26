@@ -43,8 +43,8 @@ namespace swarm_fft_audio {
 
         // Configure MQTT
         auto *mqttClient = esphome::mqtt::global_mqtt_client;
-        mqttClient->set_clean_session(true);
-        mqttClient->set_keep_alive(update_interval_/1000);
+        mqttClient->set_clean_session(false);
+        //mqttClient->set_keep_alive(update_interval_/1000);
         
         // Subscribe to our MQTT command topic
         subscribe_json(command_topic_, &SwarmFFT::on_json_message);
@@ -323,7 +323,7 @@ namespace swarm_fft_audio {
                     // Populate our stripe's data array
                     JsonObject binDoc = data.add<JsonObject>();
                     binDoc[BIN_BIN] = ++binSequence;
-                    binDoc[BIN_FREQ] = fftResult_[binIndex].frequency;
+                    binDoc[BIN_FREQ] = uint32_t(fftResult_[binIndex].frequency);
                     binDoc[BIN_MAG] = fftResult_[binIndex].magnitude;
                     binDoc[BIN_DB] = 20 * log10(fftResult_[binIndex].magnitude);
 
@@ -350,6 +350,7 @@ namespace swarm_fft_audio {
                         ESP_LOGD(TAG, "MQTT publish failed!");
                         break;
                     } else {
+                        ESP_LOGD(TAG, "stripe successfully published");
                         // // Just for debugging
                         // String msg;
                         // serializeJson(stripeDoc, msg);

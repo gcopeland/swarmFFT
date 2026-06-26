@@ -78,6 +78,7 @@ namespace swarm_fft_audio {
     static const char *BIN_MAG = "magnitude";
     static const char *BIN_DB = "db";
 
+    
     class SwarmFFT : public esphome::Component,
                      public esphome::mqtt::CustomMQTTDevice {
         public:
