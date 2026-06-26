@@ -41,6 +41,11 @@ namespace swarm_fft_audio {
         setGlobalSwarmFFT(this);
         ESP_LOGD(TAG, "SwarmFFT::setup() has registered for callbacks from static functions");
 
+        // Configure MQTT
+        auto *mqttClient = esphome::mqtt::global_mqtt_client;
+        mqttClient->set_clean_session(true);
+        mqttClient->set_keep_alive(update_interval_/1000);
+        
         // Subscribe to our MQTT command topic
         subscribe_json(command_topic_, &SwarmFFT::on_json_message);
 
@@ -143,7 +148,7 @@ namespace swarm_fft_audio {
                                                   dev[esphome::mqtt::MQTT_DEVICE_IDENTIFIERS] = "ESP_MICROPHONE_" + get_mac_address();
                                                   dev[esphome::mqtt::MQTT_DEVICE_SW_VERSION] = ESPHOME_VERSION;
                                                   dev[esphome::mqtt::MQTT_DEVICE_MANUFACTURER] = "gtcopeland";
-                                              }, 0, true);
+                                              }, 2, true);
         }
         
         return discoveryComplete_;
@@ -259,98 +264,109 @@ namespace swarm_fft_audio {
     }
 
 
-    /*
-     * Based upon freq range criteria, pass in an index
-     * and it returns a bool indicating if it passes
-     * the filter criteria. 
+    /**
+     * Walk the FFT bins starting at the provided index.
+     * Return the first index which passes the filter. If
+     * end is reached, return -1.
      */
-    bool SwarmFFT::filterByIndex(size_t index) {
-        bool retValue = false;
+    size_t SwarmFFT::filterToIndex(size_t startIndex) {
+        size_t retValue = -1;
 
-        auto bin = fftResult_[index];
-        auto freq = bin.frequency;
-        auto mag = bin.magnitude;
-        auto db = 20 * log10(bin.magnitude);
+        // Make sure we don't look past
+        if( startIndex >= FFT_BINS ) {
+            return retValue;
+        }
+
+        for( size_t index=startIndex; index < FFT_BINS; ++index ) {
+            auto bin = fftResult_[index];
+            auto freq = bin.frequency;
+            auto mag = bin.magnitude;
+            auto db = 20 * log10(bin.magnitude);
             
-        if(freq >= FFT_FILTER_MIN_FREQ &&
-           freq <= FFT_FILTER_MAX_FREQ &&
-           db >= dbFilterThreshold_) {
-            retValue = true;
+            if(freq >= FFT_FILTER_MIN_FREQ &&
+               freq <= FFT_FILTER_MAX_FREQ &&
+               db >= dbFilterThreshold_) {
+                retValue = index;
+                break;
+            }
         }
 
         return retValue;
     }
 
-
+    
     void SwarmFFT::processFFTResult() {
-        uint16_t binSequence = 0;
-        auto stripeLength = FFT_BINS/MQTT_FFT_STRIPES;
+        /**
+         * As long as we are connected, loop through all FFT bins
+         * Only add up to dataLength bins for each published json
+         * message (stripe).
+         */
+        if( is_connected() ) {
+            size_t binIndex = 0;
+            size_t binSequence = 0;
+            size_t dataLength = FFT_BINS/MQTT_FFT_STRIPES;
 
-        // FIXME: Add interval reporting.
-        // If outside the interval simply reset the processed flags
+            bool haveData = false;
+            bool haveError = false;
+        
+            for( size_t stripe=0; stripe < MQTT_FFT_STRIPES; ++stripe) {
+                JsonDocument stripeDoc;
+                stripeDoc[STRIPE_NAME] = name_;
+                stripeDoc[STRIPE_STRIPE] = stripe;
+                JsonArray data = stripeDoc[STRIPE_DATA].to<JsonArray>();
 
-        // We have connection so try to publish
-        // If publish fails we simply bail with an error
-        if(is_connected()) {
-            // Each stripe is a json msg - if any publish fails, we
-            // bail with an error. Likely loss of connection.
-            // We yield after each publish to allow WDT and publish
-            // to occur.
-#if 0
-            JsonDocument testDoc;
-            testDoc["something"] = "asdf";
-            testDoc["something else"] = "asdfdasf";
-            auto testData = testDoc["data"].to<JsonArray>();
-            JsonObject obj = testData.add<JsonObject>();
-            obj["asdf"] = "fdas";
-            publish_json(state_topic_, [testDoc](JsonObject msg) {
-                msg.set(testDoc.as<JsonObjectConst>());
-            }, 2, false);
-#endif
-            for(auto stripe=0; stripe < MQTT_FFT_STRIPES; stripe++) {
-                // FIXME: grab the bin and determine if it passes filter.
-                // Do not generate a message until we have at least one bin
-                // for the stripe.
-                bool pubed = publish_json(state_topic_,
-                                           [this, stripe, stripeLength, &binSequence](JsonObject msg) {
-                                               msg["node"] = name_;
-                                               msg["stripe"] = stripe;
-                                               JsonArray dataDoc = msg["data"].to<JsonArray>();
+                // Loop through our bins and return the index of one which passes filter
+                while( (binIndex = filterToIndex(binIndex)) != -1 ) {
+                    // Have at least one bin so we need need to publish
+                    haveData = true ;
 
-                                               // Now loop to generate the bins for this stripe
-                                               for(auto index=0; index < stripeLength; ++index) {
-                                                   auto binIndex = (stripe * stripeLength) + index;
+                    // Populate our stripe's data array
+                    JsonObject binDoc = data.add<JsonObject>();
+                    binDoc[BIN_BIN] = ++binSequence;
+                    binDoc[BIN_FREQ] = fftResult_[binIndex].frequency;
+                    binDoc[BIN_MAG] = fftResult_[binIndex].magnitude;
+                    binDoc[BIN_DB] = 20 * log10(fftResult_[binIndex].magnitude);
 
-                                                   // Filter by absolute index to see if we need to add
-                                                   // the bin to the message.
-                                                   // NOTE: This can create a json message having an
-                                                   // empty data array should all bins fail the filter.
-                                                   if(filterByIndex(binIndex)) {
-                                                       // Create the object to add to our data array
-                                                       JsonObject binDoc = dataDoc.add<JsonObject>();
-                                                       binDoc["bin"] = binSequence++;
-                                                       binDoc["frequency"] = fftResult_[binIndex].frequency;
-                                                       binDoc["magnitude"] = fftResult_[binIndex].magnitude;
-                                                       binDoc["db"] = 20 * log10(fftResult_[binIndex].magnitude);
-                                                   }
-                                               }
-                                               // Just for debugging
-                                               String text;
-                                               serializeJson(msg, text);
-                                               ESP_LOGD(TAG, "publish: %s", text.c_str());
-                                           }, 2, false);
-                if(!pubed) {
-                    // We failed to publish the message. We need to baiil on the loop
-                    ESP_LOGE(TAG, "DATA LOSS: lost WIFI/MQTT connection or MQTT queue is full");
+                    // Increment our bin index so the starting filter index is incredmented past tihs one
+                    ++binIndex;
+                
+                    // If this filled the last slot in the stripe, break
+                    // so we can send it
+                    if( binSequence % dataLength == 0 ) {
+                        break;
+                    }
+                }
+                
+                // We've processed at least one stripe, so send it if we have data
+                if( haveData ) {
+                    // Reset haveData to prevent empty stripe transmission next go around
+                    haveData = false;
+
+                    haveError = !publish_json(state_topic_, [stripeDoc](JsonObject msg) {
+                        msg.set(stripeDoc.as<JsonObjectConst>());
+                    }, 2, false);
+                
+                    if( haveError ) {
+                        ESP_LOGD(TAG, "MQTT publish failed!");
+                        break;
+                    } else {
+                        // // Just for debugging
+                        // String msg;
+                        // serializeJson(stripeDoc, msg);
+                        // ESP_LOGD(TAG, "published (%s): %s", state_topic_.c_str(), msg.c_str());
+                    }
+                }
+
+                // If we failed to send, bail from this loop
+                if( haveError ) {
+                    ESP_LOGE(TAG, "Have error so bailing on the rest of the stripes");
                     break;
-                } else {
-                    // Reschedule to actually publish it to fend off the WDT and queing issues
-                    yield();
                 }
             }
         } else {
-            // not connected - noop
-            // ESP_LOGD(TAG, "MQTT not connected.");
+            // Not connected so result the FFT until we are
+            ESP_LOGD(TAG, "not connected so resetting FFT");
+            fft_.reset();
         }
 
         // Reset our state for the next FFT collection

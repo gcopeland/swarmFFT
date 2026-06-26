@@ -61,15 +61,22 @@ namespace swarm_fft_audio {
     // FFT SPECIFICS
     static const uint16_t SAMPLE_LENGTH = 256;
     static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
-    static const uint16_t MAX_FREQ_THRESHOLD = 1200.0;
+    static const uint16_t MAX_FREQ_THRESHOLD = 1100.0;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
     static const uint16_t MQTT_FFT_STRIPES = 16;
 
     // FFT FILTER
-    static const float FFT_FLOOR_THRESHOLD = -25.0;
     static const float FFT_FILTER_MIN_FREQ = 80.0;
     static const float FFT_FILTER_MAX_FREQ = 1200.0;
 
+    // JSON document keys
+    static const char *STRIPE_NAME = "name";
+    static const char *STRIPE_STRIPE = "stripe";
+    static const char *STRIPE_DATA = "data";
+    static const char *BIN_BIN = "bin";
+    static const char *BIN_FREQ = "frequency";
+    static const char *BIN_MAG = "magnitude";
+    static const char *BIN_DB = "db";
 
     class SwarmFFT : public esphome::Component,
                      public esphome::mqtt::CustomMQTTDevice {
@@ -153,7 +160,7 @@ namespace swarm_fft_audio {
             AudioFFTResult fftResult_[FFT_BINS] = {0};
 
             // Process our FFT audio data
-            bool filterByIndex(size_t index);
+            size_t filterToIndex(size_t startIndex);
             void processFFTResult();
             bool isJSONStreamConfig(JsonObject &obj);
     };
