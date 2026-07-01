@@ -356,6 +356,9 @@ namespace swarm_fft_audio {
                         // serializeJson(stripeDoc, msg);
                         // ESP_LOGD(TAG, "published (%s): %s", state_topic_.c_str(), msg.c_str());
                     }
+                } else {
+                    // FIXME: temp debugging line to help Lee
+                    ESP_LOGD(TAG, "No data to publish.");
                 }
 
                 // If we failed to send, bail from this loop
