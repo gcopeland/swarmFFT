@@ -27,7 +27,7 @@
 
 // Audio processing & FFT
 #include <AudioTools.h>
-#include <AudioTools/AudioLibs/AudioRealFFT.h>
+#include <AudioTools/FFT/AudioRealFFT.h>
 
 // Headers for audio streaming -  UDP + Opus + Ogg container
 // #include <AudioTools/Communication/UDPStream.h>
