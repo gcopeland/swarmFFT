@@ -46,7 +46,8 @@ namespace swarm_fft_audio {
     // AUDIO INPUT
     static const uint16_t INPUT_CHANNELS = 2;
     static const uint16_t INPUT_BITS_PER_SAMPLE = 32;
-    static const uint16_t INPUT_SAMPLES_PER_SECOND = 22050;
+    //static const uint16_t INPUT_SAMPLES_PER_SECOND = 22050;
+    static const uint16_t INPUT_SAMPLES_PER_SECOND = 44100;
 
     // AUDIO OUTPUT
     static const uint16_t OUTPUT_CHANNELS = 1;
