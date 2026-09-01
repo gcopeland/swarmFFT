@@ -60,7 +60,7 @@ namespace swarm_fft_audio {
     // static const uint32_t OPUS_COMPEXITY = 3;
 
     // FFT SPECIFICS
-    static const uint16_t SAMPLE_LENGTH = 512;
+    static const uint16_t SAMPLE_LENGTH = 1024;
     static const uint16_t MIN_FREQ_THRESHOLD = 20.0;
     static const uint16_t MAX_FREQ_THRESHOLD = 1100.0;
     static const uint16_t FFT_BINS = SAMPLE_LENGTH / 2;
